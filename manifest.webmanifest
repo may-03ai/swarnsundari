@@ -1,0 +1,11 @@
+{
+  "name": "Svarnsundari 1 Gram Gold",
+  "short_name": "Svarnsundari",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF8F0",
+  "theme_color": "#D4AF37",
+  "icons": [
+    { "src": "assets/icons/favicon.svg", "sizes": "64x64", "type": "image/svg+xml" }
+  ]
+}

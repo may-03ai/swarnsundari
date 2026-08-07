@@ -1,0 +1,22 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630' viewBox='0 0 1200 630'>
+  <defs>
+    <linearGradient id='g' x1='0' x2='1'>
+      <stop offset='0' stop-color='#FFF8F0'/>
+      <stop offset='1' stop-color='#FDFBF7'/>
+    </linearGradient>
+    <linearGradient id='gold' x1='0' x2='1'>
+      <stop offset='0' stop-color='#D4AF37'/>
+      <stop offset='1' stop-color='#B8860B'/>
+    </linearGradient>
+  </defs>
+  <rect width='1200' height='630' fill='url(#g)' />
+  <g transform='translate(80,70)'>
+    <rect width='1040' height='490' rx='20' fill='rgba(0,0,0,0.02)' />
+    <text x='80' y='160' font-family='Playfair Display, serif' font-size='48' fill='#4B3621'>SwarnaSundari</text>
+    <text x='80' y='220' font-family='Montserrat, sans-serif' font-size='22' fill='#8C6A2F'>1 Gram Gold Jewellery</text>
+    <g transform='translate(740,60)'>
+      <circle cx='0' cy='0' r='120' fill='url(#gold)' opacity='0.95'/>
+      <text x='-24' y='12' font-family='Playfair Display, serif' font-size='36' fill='#fff'>S</text>
+    </g>
+  </g>
+</svg>

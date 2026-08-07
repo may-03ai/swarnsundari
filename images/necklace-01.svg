@@ -1,0 +1,14 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'>
+  <defs>
+    <linearGradient id='g' x1='0' x2='1'>
+      <stop offset='0' stop-color='#FFF8F0'/>
+      <stop offset='1' stop-color='#FDFBF7'/>
+    </linearGradient>
+  </defs>
+  <rect width='1200' height='800' fill='url(#g)' />
+  <g transform='translate(80,80)'>
+    <rect width='1040' height='640' rx='24' fill='rgba(75,54,33,0.02)' />
+    <text x='80' y='160' font-family='Playfair Display, serif' font-size='56' fill='#4B3621'>Necklace</text>
+    <text x='80' y='240' font-family='Montserrat, sans-serif' font-size='22' fill='#8C6A2F'>Premium placeholder image — replace with product photo</text>
+  </g>
+</svg>

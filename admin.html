@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Admin • SwarnaSundari</title>
+    <meta name="description" content="Secure admin panel for SwarnaSundari catalog updates.">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+      :root {
+        --admin-bg: #fffaf1;
+        --admin-panel: #ffffff;
+        --admin-border: rgba(212, 175, 55, 0.22);
+        --admin-text: #3f2f1d;
+        --admin-muted: #7a6443;
+        --admin-accent: #d4af37;
+        --admin-accent-strong: #b8860b;
+      }
+      body {
+        background: linear-gradient(180deg, #fffaf1 0%, #fff7ea 100%);
+        color: var(--admin-text);
+      }
+      .admin-shell {
+        min-height: 100vh;
+        padding: 24px 16px 70px;
+      }
+      .admin-card {
+        max-width: 1160px;
+        margin: 0 auto;
+        background: var(--admin-panel);
+        border: 1px solid var(--admin-border);
+        border-radius: 24px;
+        box-shadow: 0 24px 70px rgba(75, 54, 33, 0.08);
+        overflow: hidden;
+      }
+      .admin-header {
+        padding: 24px 24px 18px;
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.16), rgba(255, 247, 232, 0.95));
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+      .admin-title {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(1.4rem, 2vw, 1.9rem);
+        margin: 0;
+        color: var(--lux-brown);
+      }
+      .admin-subtitle {
+        color: var(--admin-muted);
+        margin-top: 4px;
+        font-size: 0.95rem;
+      }
+      .admin-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 24px;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.16);
+      }
+      .admin-toolbar .search-row {
+        margin: 0;
+        flex: 1 1 260px;
+      }
+      .admin-toolbar .controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .admin-panel {
+        padding: 24px;
+      }
+      .login-screen {
+        display: grid;
+        place-items: center;
+        min-height: 70vh;
+        padding: 24px;
+      }
+      .login-box {
+        width: min(100%, 420px);
+        background: var(--admin-panel);
+        border: 1px solid var(--admin-border);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 24px 70px rgba(75, 54, 33, 0.08);
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      label {
+        font-weight: 700;
+        color: var(--lux-brown);
+        font-size: 0.95rem;
+      }
+      input, textarea, select, button {
+        font: inherit;
+      }
+      input, textarea, select {
+        border: 1px solid rgba(212, 175, 55, 0.28);
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: #fffdf8;
+        color: var(--admin-text);
+      }
+      textarea { min-height: 100px; resize: vertical; }
+      .btn {
+        border: none;
+        border-radius: 12px;
+        padding: 10px 16px;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: linear-gradient(90deg, var(--admin-accent), var(--admin-accent-strong));
+        color: #111;
+        font-weight: 700;
+      }
+      .btn-secondary {
+        background: #fff4d9;
+        color: var(--lux-brown);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+      }
+      .btn-danger {
+        background: #7a2e2e;
+        color: #fff;
+      }
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+      .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .product-card {
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 18px;
+        padding: 14px;
+        background: #fffdfa;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .product-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 12px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        width: fit-content;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #fff3cf;
+        color: var(--lux-brown);
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+      .price-row {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+        flex-wrap: wrap;
+      }
+      .muted {
+        color: var(--admin-muted);
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(13, 9, 4, 0.48);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 2000;
+      }
+      .modal-backdrop.open { display: flex; }
+      .modal {
+        width: min(100%, 720px);
+        max-height: 92vh;
+        overflow: auto;
+        background: #fffdfa;
+        border-radius: 24px;
+        padding: 20px;
+        box-shadow: 0 40px 90px rgba(0,0,0,0.22);
+      }
+      .modal h3 { margin-top: 0; }
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .field.full { grid-column: 1 / -1; }
+      .preview-box {
+        border: 1px dashed rgba(212, 175, 55, 0.3);
+        border-radius: 16px;
+        padding: 12px;
+        background: #fff8eb;
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .preview-box img {
+        max-width: 100%;
+        max-height: 180px;
+        object-fit: contain;
+        border-radius: 12px;
+      }
+      .toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        padding: 12px 16px;
+        border-radius: 999px;
+        background: #2d2b1f;
+        color: white;
+        display: none;
+        z-index: 2600;
+        max-width: 90vw;
+      }
+      .toast.show { display: block; }
+      .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.35);
+        border-top-color: #fff;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .sr-only { position: absolute !important; clip: rect(1px, 1px, 1px, 1px); }
+      @media (max-width: 760px) {
+        .admin-header, .admin-toolbar, .admin-panel { padding-left: 16px; padding-right: 16px; }
+        .field-grid { grid-template-columns: 1fr; }
+        .products-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-shell">
+      <div class="admin-card">
+        <div id="loginScreen" class="login-screen">
+          <div class="login-box">
+            <h1 class="admin-title">SwarnaSundari Admin</h1>
+            <p class="admin-subtitle">Use the shared admin password to update the catalog safely.</p>
+            <form id="loginForm" class="grid">
+              <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Enter admin password">
+              </div>
+              <button class="btn btn-primary" type="submit">Sign in</button>
+              <p id="loginError" class="muted" style="margin:0; min-height: 1.2em;"></p>
+            </form>
+          </div>
+        </div>
+
+        <div id="dashboard" style="display:none;">
+          <div class="admin-header">
+            <div>
+              <h1 class="admin-title">Catalog Dashboard</h1>
+              <p class="admin-subtitle">Add, edit, or remove products. Changes publish live through Netlify after a GitHub commit.</p>
+            </div>
+            <button class="btn btn-secondary" id="logoutBtn" type="button">Log out</button>
+          </div>
+
+          <div class="admin-toolbar">
+            <div class="search-row">
+              <input id="searchInput" placeholder="Search by name or category" aria-label="Search products">
+            </div>
+            <div class="controls">
+              <button class="btn btn-primary" id="addProductBtn" type="button">Add Product</button>
+            </div>
+          </div>
+
+          <div class="admin-panel">
+            <div id="statusNote" class="pill" style="display:none; margin-bottom: 12px;"></div>
+            <div id="productsContainer" class="products-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="productModal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <h3 id="modalTitle">Add product</h3>
+        <form id="productForm" novalidate>
+          <input id="productId" type="hidden">
+          <input id="existingImage" type="hidden">
+          <div class="field-grid">
+            <div class="field">
+              <label for="productName">Name</label>
+              <input id="productName" required>
+            </div>
+            <div class="field">
+              <label for="categorySelect">Category</label>
+              <select id="categorySelect"></select>
+            </div>
+            <div class="field full">
+              <label for="newCategoryInput">New category</label>
+              <input id="newCategoryInput" placeholder="Enter a new category if needed" style="display:none;">
+            </div>
+            <div class="field full">
+              <label for="productDesc">Description</label>
+              <textarea id="productDesc"></textarea>
+            </div>
+            <div class="field">
+              <label for="productPrice">Price (INR)</label>
+              <input id="productPrice" type="number" min="0" step="1" required>
+            </div>
+            <div class="field">
+              <label for="productDiscount">Discount (%)</label>
+              <input id="productDiscount" type="number" min="0" max="100" step="1" value="0">
+            </div>
+            <div class="field">
+              <label for="productImage">Image</label>
+              <input id="productImage" type="file" accept="image/png,image/jpeg,image/webp" >
+            </div>
+            <div class="field">
+              <label for="premiumCheck">Premium</label>
+              <input id="premiumCheck" type="checkbox" style="width: 18px; height: 18px; margin-top: 8px;">
+            </div>
+            <div class="field full">
+              <div class="preview-box" id="imagePreviewBox">
+                <span class="muted">Image preview will appear here.</span>
+              </div>
+            </div>
+          </div>
+          <p id="formError" class="muted" style="min-height:1.2em; margin: 10px 0 0;"></p>
+          <div class="actions" style="margin-top: 16px; justify-content: flex-end;">
+            <button class="btn btn-secondary" type="button" id="cancelFormBtn">Cancel</button>
+            <button class="btn btn-primary" type="submit" id="saveProductBtn">Save product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const API_BASE = '/.netlify/functions';
+      const state = {
+        token: sessionStorage.getItem('adminToken') || '',
+        products: [],
+        editingId: null,
+        pendingImageData: null,
+        pendingImageName: '',
+        pendingImageMime: ''
+      };
+
+      const loginScreen = document.getElementById('loginScreen');
+      const dashboard = document.getElementById('dashboard');
+      const loginForm = document.getElementById('loginForm');
+      const loginError = document.getElementById('loginError');
+      const productsContainer = document.getElementById('productsContainer');
+      const searchInput = document.getElementById('searchInput');
+      const addProductBtn = document.getElementById('addProductBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const statusNote = document.getElementById('statusNote');
+      const productModal = document.getElementById('productModal');
+      const productForm = document.getElementById('productForm');
+      const modalTitle = document.getElementById('modalTitle');
+      const productIdInput = document.getElementById('productId');
+      const existingImageInput = document.getElementById('existingImage');
+      const productNameInput = document.getElementById('productName');
+      const categorySelect = document.getElementById('categorySelect');
+      const newCategoryInput = document.getElementById('newCategoryInput');
+      const productDescInput = document.getElementById('productDesc');
+      const productPriceInput = document.getElementById('productPrice');
+      const productDiscountInput = document.getElementById('productDiscount');
+      const productImageInput = document.getElementById('productImage');
+      const premiumCheckInput = document.getElementById('premiumCheck');
+      const imagePreviewBox = document.getElementById('imagePreviewBox');
+      const formError = document.getElementById('formError');
+      const cancelFormBtn = document.getElementById('cancelFormBtn');
+      const saveProductBtn = document.getElementById('saveProductBtn');
+      const toast = document.getElementById('toast');
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(() => toast.classList.remove('show'), 3200);
+      }
+
+      function showLogin() {
+        loginScreen.style.display = 'grid';
+        dashboard.style.display = 'none';
+      }
+
+      function showDashboard() {
+        loginScreen.style.display = 'none';
+        dashboard.style.display = 'block';
+      }
+
+      async function apiRequest(path, options = {}) {
+        const headers = options.headers || {};
+        if (state.token) headers.Authorization = `Bearer ${state.token}`;
+        const response = await fetch(`${API_BASE}${path}`, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...headers
+          }
+        });
+        const text = await response.text();
+        let data = null;
+        if (text) {
+          try { data = JSON.parse(text); } catch (e) { data = { message: text }; }
+        }
+        if (!response.ok) {
+          throw new Error(data?.error || data?.message || 'Request failed.');
+        }
+        return data;
+      }
+
+      function getImageUrl(imagePath) {
+        if (!imagePath) return '';
+        if (/^https?:\/\//i.test(imagePath)) return imagePath;
+        return new URL(imagePath, window.location.origin + '/').href;
+      }
+
+      function renderProducts(list) {
+        if (!list.length) {
+          productsContainer.innerHTML = '<div class="muted">No products yet. Add one to start.</div>';
+          return;
+        }
+        productsContainer.innerHTML = list.map((product) => {
+          const discount = Number(product.discount || 0);
+          const discountedPrice = discount > 0 ? Math.round(product.price * (1 - discount / 100)) : Number(product.price);
+          const premium = product.premium ? '<span class="pill">★ Premium</span>' : '<span class="pill">Standard</span>';
+          const imageHtml = product.image ? `<img src="${getImageUrl(product.image)}" alt="${product.name}">` : '<div class="preview-box" style="height:180px"><span class="muted">No image</span></div>';
+          return `
+            <article class="product-card">
+              ${imageHtml}
+              <div>
+                <h3 style="margin:0 0 6px;">${product.name}</h3>
+                <p class="muted" style="margin:0 0 6px;">${product.category || 'Uncategorized'}</p>
+                <div class="price-row">
+                  ${discount > 0 ? `<span style="text-decoration:line-through; color:#8d7142;">₹${Number(product.price).toLocaleString('en-IN')}</span>` : ''}
+                  <strong>₹${discountedPrice.toLocaleString('en-IN')}</strong>
+                </div>
+                ${discount > 0 ? `<div class="muted">${discount}% off</div>` : ''}
+              </div>
+              <div class="actions">
+                ${premium}
+              </div>
+              <div class="actions" style="margin-top:auto;">
+                <button class="btn btn-secondary" type="button" data-action="edit" data-id="${product.id}">Edit</button>
+                <button class="btn btn-danger" type="button" data-action="delete" data-id="${product.id}">Delete</button>
+              </div>
+            </article>`;
+        }).join('');
+      }
+
+      function filterProducts() {
+        const query = searchInput.value.trim().toLowerCase();
+        const filtered = state.products.filter((product) => {
+          const haystack = `${product.name} ${product.category} ${product.desc}`.toLowerCase();
+          return haystack.includes(query);
+        });
+        renderProducts(filtered);
+      }
+
+      async function loadProducts() {
+        try {
+          const data = await apiRequest('/get-products');
+          state.products = Array.isArray(data.products) ? data.products : [];
+          renderProducts(state.products);
+        } catch (error) {
+          showToast(error.message || 'Unable to load products.');
+          if (String(error.message).includes('401')) {
+            logout();
+          }
+        }
+      }
+
+      function resetForm() {
+        state.editingId = null;
+        state.pendingImageData = null;
+        state.pendingImageName = '';
+        state.pendingImageMime = '';
+        productForm.reset();
+        productIdInput.value = '';
+        existingImageInput.value = '';
+        premiumCheckInput.checked = false;
+        newCategoryInput.style.display = 'none';
+        imagePreviewBox.innerHTML = '<span class="muted">Image preview will appear here.</span>';
+        formError.textContent = '';
+        modalTitle.textContent = 'Add product';
+        productDiscountInput.value = '0';
+      }
+
+      function openModal(product = null) {
+        resetForm();
+        if (product) {
+          state.editingId = product.id;
+          modalTitle.textContent = 'Edit product';
+          productIdInput.value = product.id;
+          existingImageInput.value = product.image || '';
+          productNameInput.value = product.name || '';
+          productDescInput.value = product.desc || '';
+          productPriceInput.value = product.price || '';
+          productDiscountInput.value = product.discount || 0;
+          premiumCheckInput.checked = Boolean(product.premium);
+          fillCategoryOptions(product.category || '');
+          if (product.image) {
+            imagePreviewBox.innerHTML = `<img src="${getImageUrl(product.image)}" alt="Current preview">`;
+          }
+        } else {
+          fillCategoryOptions('');
+        }
+        productModal.classList.add('open');
+        productModal.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeModal() {
+        productModal.classList.remove('open');
+        productModal.setAttribute('aria-hidden', 'true');
+        resetForm();
+      }
+
+      function fillCategoryOptions(selectedCategory = '') {
+        const categories = Array.from(new Set(state.products.map((product) => product.category).filter(Boolean))).sort();
+        const options = ['<option value="">Select a category</option>'];
+        categories.forEach((category) => {
+          options.push(`<option value="${category}">${category}</option>`);
+        });
+        options.push('<option value="__new__">Add new category</option>');
+        categorySelect.innerHTML = options.join('');
+        if (selectedCategory) {
+          const optionExists = Array.from(categorySelect.options).some((option) => option.value === selectedCategory);
+          if (optionExists) {
+            categorySelect.value = selectedCategory;
+          } else {
+            categorySelect.value = '__new__';
+            newCategoryInput.value = selectedCategory;
+            newCategoryInput.style.display = 'block';
+          }
+        } else {
+          categorySelect.value = '';
+        }
+      }
+
+      categorySelect.addEventListener('change', () => {
+        newCategoryInput.style.display = categorySelect.value === '__new__' ? 'block' : 'none';
+      });
+
+      productImageInput.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+          formError.textContent = 'Please choose a JPG, PNG, or WebP image.';
+          return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+          formError.textContent = 'Image must be 2MB or smaller.';
+          return;
+        }
+        formError.textContent = '';
+        const reader = new FileReader();
+        reader.onload = () => {
+          state.pendingImageData = reader.result;
+          state.pendingImageName = file.name;
+          state.pendingImageMime = file.type;
+          imagePreviewBox.innerHTML = `<img src="${reader.result}" alt="New image preview">`;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const password = document.getElementById('password').value;
+        try {
+          const data = await fetch(`${API_BASE}/admin-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+          }).then((response) => response.json());
+          if (!data.ok) throw new Error(data.error || 'Incorrect password.');
+          state.token = data.token;
+          sessionStorage.setItem('adminToken', data.token);
+          showDashboard();
+          await loadProducts();
+        } catch (error) {
+          loginError.textContent = error.message || 'Login failed.';
+        }
+      });
+
+      logoutBtn.addEventListener('click', logout);
+
+      function logout() {
+        sessionStorage.removeItem('adminToken');
+        state.token = '';
+        showLogin();
+      }
+
+      addProductBtn.addEventListener('click', () => openModal());
+      cancelFormBtn.addEventListener('click', closeModal);
+
+      productForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const payload = {
+          id: productIdInput.value ? Number(productIdInput.value) : null,
+          name: productNameInput.value.trim(),
+          category: categorySelect.value === '__new__' ? newCategoryInput.value.trim() : categorySelect.value.trim(),
+          desc: productDescInput.value.trim(),
+          price: Number(productPriceInput.value),
+          discount: Number(productDiscountInput.value || 0),
+          premium: premiumCheckInput.checked,
+          image: existingImageInput.value || ''
+        };
+
+        if (!payload.name) {
+          formError.textContent = 'Please enter a product name.';
+          return;
+        }
+        if (!payload.category) {
+          formError.textContent = 'Please select or add a category.';
+          return;
+        }
+        if (Number.isNaN(payload.price) || payload.price < 0) {
+          formError.textContent = 'Price must be a non-negative number.';
+          return;
+        }
+        if (Number.isNaN(payload.discount) || payload.discount < 0 || payload.discount > 100) {
+          formError.textContent = 'Discount must be between 0 and 100.';
+          return;
+        }
+
+        saveProductBtn.disabled = true;
+        saveProductBtn.innerHTML = '<span class="spinner"></span>';
+        formError.textContent = '';
+
+        try {
+          const result = await apiRequest('/save-product', {
+            method: 'POST',
+            body: JSON.stringify({
+              product: payload,
+              imageBase64: state.pendingImageData || '',
+              imageName: state.pendingImageName || '',
+              imageMime: state.pendingImageMime || ''
+            })
+          });
+          showToast(result.message || 'Product saved.');
+          closeModal();
+          await loadProducts();
+          statusNote.textContent = 'Changes saved — the site will update in 1–2 minutes.';
+          statusNote.style.display = 'inline-flex';
+        } catch (error) {
+          formError.textContent = error.message || 'Unable to save product.';
+        } finally {
+          saveProductBtn.disabled = false;
+          saveProductBtn.innerHTML = 'Save product';
+        }
+      });
+
+      productsContainer.addEventListener('click', async (event) => {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+        const id = Number(button.dataset.id);
+        const action = button.dataset.action;
+        const product = state.products.find((item) => item.id === id);
+        if (!product) return;
+
+        if (action === 'edit') {
+          openModal(product);
+          return;
+        }
+
+        if (action === 'delete' && window.confirm(`Delete ${product.name}?`)) {
+          try {
+            const result = await apiRequest('/delete-product', {
+              method: 'POST',
+              body: JSON.stringify({ id })
+            });
+            showToast(result.message || 'Product deleted.');
+            await loadProducts();
+          } catch (error) {
+            showToast(error.message || 'Unable to delete product.');
+          }
+        }
+      });
+
+      searchInput.addEventListener('input', filterProducts);
+
+      if (state.token) {
+        showDashboard();
+        loadProducts();
+      } else {
+        showLogin();
+      }
+    </script>
+  </body>
+</html>
