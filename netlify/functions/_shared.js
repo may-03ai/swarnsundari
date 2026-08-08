@@ -108,13 +108,22 @@ function buildGitHubHeaders(token) {
   };
 }
 
-async function githubRequest({ token, repo, path, method = 'GET', body = null }) {
-  const url = `https://api.github.com/repos/${repo}${path}`;
+async function githubRequest({ token, repo, path, branch = getEnv('GITHUB_BRANCH') || 'main', method = 'GET', body = null }) {
+  const url = new URL(`https://api.github.com/repos/${repo}${path}`);
+  if (branch && path.startsWith('/contents/')) {
+    url.searchParams.set('ref', branch);
+  }
+
   const headers = buildGitHubHeaders(token);
-  const response = await fetch(url, {
+  const requestBody = body ? { ...body } : null;
+  if (requestBody && branch && path.startsWith('/contents/')) {
+    requestBody.branch = branch;
+  }
+
+  const response = await fetch(url.toString(), {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined
+    body: requestBody ? JSON.stringify(requestBody) : undefined
   });
   const text = await response.text();
   let data = null;
@@ -126,7 +135,8 @@ async function githubRequest({ token, repo, path, method = 'GET', body = null })
     }
   }
   if (!response.ok) {
-    throw new Error(data && (data.message || data.error) ? String(data.message || data.error) : 'GitHub request failed.');
+    const message = data && (data.message || data.error) ? String(data.message || data.error) : 'GitHub request failed.';
+    throw new Error(message.includes('rate limit') ? 'GitHub rate limit reached. Please try again later.' : message);
   }
   return data;
 }

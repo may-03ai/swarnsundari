@@ -15,6 +15,7 @@ async function uploadImageToRepo({ token, repo, imageBase64, imageName, imageMim
     token,
     repo,
     path,
+    branch: getEnv('GITHUB_BRANCH') || 'main',
     method: 'PUT',
     body: {
       message: `Admin image: ${fileName}`,
@@ -31,7 +32,7 @@ exports.handler = async (event) => {
   }
 
   const token = getAuthToken(event);
-  const tokenSecret = getEnv('ADMIN_TOKEN_SECRET');
+  const tokenSecret = getEnv('ADMIN_TOKEN_SECRET') || getEnv('ADMIN_PASSWORD');
   if (!token || !tokenSecret || !verifyAdminToken(token, tokenSecret)) {
     return jsonResponse(401, { error: 'Unauthorized.' });
   }
@@ -43,6 +44,7 @@ exports.handler = async (event) => {
 
   const repo = getEnv('GITHUB_REPO');
   const githubToken = getEnv('GITHUB_TOKEN');
+  const branch = getEnv('GITHUB_BRANCH') || 'main';
   if (!repo || !githubToken) {
     return jsonResponse(500, { error: 'GitHub integration is not configured.' });
   }
@@ -66,7 +68,8 @@ exports.handler = async (event) => {
     const fileResponse = await githubRequest({
       token: githubToken,
       repo,
-      path: '/contents/products.json'
+      path: '/contents/products.json',
+      branch
     });
     const products = ensureProductsArray(JSON.parse(base64Decode(fileResponse.content || '')));
     const existingProduct = products.find((entry) => entry.id === Number(product.id));
@@ -109,11 +112,13 @@ exports.handler = async (event) => {
       token: githubToken,
       repo,
       path: '/contents/products.json',
+      branch,
       method: 'PUT',
       body: {
         message: existingProduct ? `Admin edit: ${productName}` : `Admin add: ${productName}`,
         content: updatedContent,
-        sha: fileResponse.sha
+        sha: fileResponse.sha,
+        branch
       }
     });
 

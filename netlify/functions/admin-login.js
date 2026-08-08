@@ -11,7 +11,7 @@ exports.handler = async (event) => {
   }
 
   const password = getEnv('ADMIN_PASSWORD');
-  const tokenSecret = getEnv('ADMIN_TOKEN_SECRET');
+  const tokenSecret = getEnv('ADMIN_TOKEN_SECRET') || getEnv('ADMIN_PASSWORD');
 
   if (!password || !tokenSecret) {
     return jsonResponse(500, { error: 'Admin login is not configured yet.' });

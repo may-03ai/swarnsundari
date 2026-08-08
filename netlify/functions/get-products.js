@@ -6,13 +6,14 @@ exports.handler = async (event) => {
   }
 
   const token = getAuthToken(event);
-  const tokenSecret = getEnv('ADMIN_TOKEN_SECRET');
+  const tokenSecret = getEnv('ADMIN_TOKEN_SECRET') || getEnv('ADMIN_PASSWORD');
   if (!token || !tokenSecret || !verifyAdminToken(token, tokenSecret)) {
     return jsonResponse(401, { error: 'Unauthorized.' });
   }
 
   const repo = getEnv('GITHUB_REPO');
   const githubToken = getEnv('GITHUB_TOKEN');
+  const branch = getEnv('GITHUB_BRANCH') || 'main';
   if (!repo || !githubToken) {
     return jsonResponse(500, { error: 'GitHub integration is not configured.' });
   }
@@ -21,7 +22,8 @@ exports.handler = async (event) => {
     const file = await githubRequest({
       token: githubToken,
       repo,
-      path: '/contents/products.json'
+      path: '/contents/products.json',
+      branch
     });
 
     const raw = base64Decode(file.content || '');
