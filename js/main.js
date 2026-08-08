@@ -18,6 +18,15 @@ function normalizeImagePath(path){
   return String(path).replace(/\\/g, '/').replace(/^\.\//, '');
 }
 
+function escapeHtml(value){
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function buildImageUrl(path){
   const normalized = normalizeImagePath(path);
   if (/^https?:\/\//i.test(normalized)) return normalized;
@@ -64,13 +73,13 @@ async function loadProducts(){
 function populateFilterOptions(){
   if(!filterSelect) return;
   const cats = Array.from(new Set(products.map(p=>p.category))).sort();
-  filterSelect.innerHTML = '<option value="all">All categories</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  filterSelect.innerHTML = '<option value="all">All categories</option>' + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
 
   // render mobile chips
   const chipRow = document.getElementById('chipRow');
   if(chipRow){
     const all = ['All', ...cats];
-    chipRow.innerHTML = all.map((c,i)=>`<button role="tab" aria-selected="${i===0}" data-cat="${c==='All'?'all':c}" class="chip ${i===0?'active':''}">${c}</button>`).join('');
+    chipRow.innerHTML = all.map((c,i)=>`<button role="tab" aria-selected="${i===0}" data-cat="${escapeHtml(c==='All'?'all':c)}" class="chip ${i===0?'active':''}">${escapeHtml(c)}</button>`).join('');
     chipRow.addEventListener('click', (ev)=>{
       const btn = ev.target.closest('button[data-cat]');
       if(!btn) return;
@@ -114,18 +123,18 @@ function createProductCard(p){
   const imageSrc = p.imageUrl || p.image;
   card.innerHTML = `
     <div style="position:relative">
-      <img data-src="${imageSrc}" alt="${p.name}" class="lazy" onclick="openLightbox(this)">
-      ${hasDiscount ? `<div class="badge" style="position:absolute;left:12px;top:12px;background:linear-gradient(90deg,var(--gold),var(--gold-dark));color:#111">-${p.discount}%</div>` : ''}
+      <img data-src="${escapeHtml(imageSrc)}" alt="${escapeHtml(p.name)}" class="lazy" onclick="openLightbox(this)">
+      ${hasDiscount ? `<div class="badge" style="position:absolute;left:12px;top:12px;background:linear-gradient(90deg,var(--gold),var(--gold-dark));color:#111">-${escapeHtml(p.discount)}%</div>` : ''}
     </div>
     <div class="card-body">
       <span class="badge">Premium</span>
-      <h3>${p.name}</h3>
-      <p>${p.desc}</p>
+      <h3>${escapeHtml(p.name)}</h3>
+      <p>${escapeHtml(p.desc)}</p>
       <div style="margin:8px 0">
         ${hasDiscount ? `<div style="font-size:14px;color:#888;text-decoration:line-through">${formatINR(p.price)}</div><div style="font-size:18px;font-weight:700;color:var(--gold-dark)">${formatINR(discountedPrice)}</div>` : `<div style="font-size:18px;font-weight:700;color:var(--gold-dark)">${formatINR(p.price)}</div>`}
       </div>
       <div class="actions">
-        <small>${p.category}</small>
+        <small>${escapeHtml(p.category)}</small>
       </div>
       <div style="padding:12px">
         <button class="btn btn-primary btn-card-cta" onclick='enquire(${p.id})'>Enquire on WhatsApp</button>

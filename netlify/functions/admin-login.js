@@ -1,4 +1,4 @@
-const { getEnv, issueAdminToken, jsonResponse, parseJsonBody, constantTimeCompare, safeErrorMessage } = require('./_shared');
+const { getEnv, issueAdminToken, jsonResponse, parseJsonBody, constantTimeCompare, safeErrorMessage, getLoginRateLimitStatus, recordLoginFailure, resetLoginAttempts } = require('./_shared');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -17,10 +17,20 @@ exports.handler = async (event) => {
     return jsonResponse(500, { error: 'Admin login is not configured yet.' }, {}, event);
   }
 
+  const rateLimitState = getLoginRateLimitStatus(event);
+  if (!rateLimitState.allowed) {
+    return jsonResponse(429, { error: 'Too many login attempts. Please try again shortly.' }, {
+      'Retry-After': String(Math.max(1, Math.ceil(rateLimitState.retryAfterMs / 1000)))
+    }, event);
+  }
+
   const suppliedPassword = typeof body.password === 'string' ? body.password : '';
   if (!constantTimeCompare(suppliedPassword, password)) {
+    recordLoginFailure(event);
     return jsonResponse(401, { error: 'Incorrect password.' }, {}, event);
   }
+
+  resetLoginAttempts(event);
 
   try {
     const issued = issueAdminToken(tokenSecret, 15 * 60 * 1000);

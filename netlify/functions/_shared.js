@@ -3,6 +3,9 @@ const zlib = require('zlib');
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif']);
+const LOGIN_RATE_LIMIT_MAX_FAILURES = 5;
+const LOGIN_RATE_LIMIT_LOCKOUT_MS = 10 * 60 * 1000;
+const loginAttempts = new Map();
 
 function getEnv(name) {
   return process.env[name] || '';
@@ -84,6 +87,65 @@ function getHeader(headers, name) {
   const direct = headers[name];
   const lowered = headers[name.toLowerCase()];
   return typeof direct === 'string' ? direct : typeof lowered === 'string' ? lowered : '';
+}
+
+function getClientIp(event) {
+  const headers = event && event.headers ? event.headers : {};
+  const candidates = [
+    getHeader(headers, 'CF-Connecting-IP'),
+    getHeader(headers, 'X-Forwarded-For'),
+    getHeader(headers, 'X-Real-IP'),
+    getHeader(headers, 'Client-IP'),
+    getHeader(headers, 'X-NF-Client-Connection-IP')
+  ];
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate.split(',')[0].trim();
+    }
+  }
+  return 'unknown';
+}
+
+function getLoginRateLimitStatus(event) {
+  const ip = getClientIp(event);
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+  if (!entry) return { allowed: true, retryAfterMs: 0 };
+  if (entry.lockedUntil && entry.lockedUntil > now) {
+    return { allowed: false, retryAfterMs: entry.lockedUntil - now };
+  }
+  if (entry.lockedUntil && entry.lockedUntil <= now) {
+    loginAttempts.delete(ip);
+  }
+  return { allowed: true, retryAfterMs: 0 };
+}
+
+function recordLoginFailure(event) {
+  const ip = getClientIp(event);
+  const now = Date.now();
+  const entry = loginAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+  if (entry.lockedUntil && entry.lockedUntil > now) {
+    return { allowed: false, retryAfterMs: entry.lockedUntil - now };
+  }
+  entry.count += 1;
+  if (entry.count >= LOGIN_RATE_LIMIT_MAX_FAILURES) {
+    entry.lockedUntil = now + LOGIN_RATE_LIMIT_LOCKOUT_MS;
+  }
+  loginAttempts.set(ip, entry);
+  return {
+    allowed: entry.count < LOGIN_RATE_LIMIT_MAX_FAILURES,
+    retryAfterMs: entry.lockedUntil ? entry.lockedUntil - now : 0
+  };
+}
+
+function resetLoginAttempts(event) {
+  const ip = getClientIp(event);
+  loginAttempts.delete(ip);
+  return true;
+}
+
+function clearLoginRateLimitEntries() {
+  loginAttempts.clear();
 }
 
 function appendVaryHeader(currentValue, value) {
@@ -290,5 +352,10 @@ module.exports = {
   base64Decode,
   ensureProductsArray,
   safeErrorMessage,
-  validateImagePayload
+  validateImagePayload,
+  getClientIp,
+  getLoginRateLimitStatus,
+  recordLoginFailure,
+  resetLoginAttempts,
+  clearLoginRateLimitEntries
 };

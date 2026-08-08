@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { constantTimeCompare, validateImagePayload, safeErrorMessage, verifyAdminToken, issueAdminToken } = require('../netlify/functions/_shared');
+const { constantTimeCompare, validateImagePayload, safeErrorMessage, verifyAdminToken, issueAdminToken, getLoginRateLimitStatus, recordLoginFailure, resetLoginAttempts, clearLoginRateLimitEntries } = require('../netlify/functions/_shared');
 
 test('constantTimeCompare returns true for matching secrets and false for mismatches', () => {
   assert.equal(constantTimeCompare('secret', 'secret'), true);
@@ -31,4 +31,25 @@ test('verifyAdminToken rejects malformed and expired tokens', () => {
   assert.ok(verifyAdminToken(token, 'secret'));
   assert.equal(verifyAdminToken('not-a-valid-token', 'secret'), null);
   assert.equal(verifyAdminToken(`${token}.tampered`, 'secret'), null);
+});
+
+test('login rate limiting blocks repeated failures per IP', () => {
+  clearLoginRateLimitEntries();
+  const event = { headers: { 'x-forwarded-for': '203.0.113.10' } };
+
+  for (let index = 0; index < 4; index += 1) {
+    const result = recordLoginFailure(event);
+    assert.equal(result.allowed, true);
+  }
+
+  const blocked = recordLoginFailure(event);
+  assert.equal(blocked.allowed, false);
+  assert.ok(blocked.retryAfterMs > 0);
+
+  const status = getLoginRateLimitStatus(event);
+  assert.equal(status.allowed, false);
+  assert.ok(status.retryAfterMs > 0);
+
+  resetLoginAttempts(event);
+  assert.equal(getLoginRateLimitStatus(event).allowed, true);
 });
