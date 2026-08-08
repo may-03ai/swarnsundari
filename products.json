@@ -23,11 +23,11 @@
     "id": 7,
     "name": "Classic Long Haram (2)",
     "category": "Long Haram",
-    "image": "images/Classic Long Haram.jpg",
     "desc": "Traditional long haram variant.",
-    "price": 8600,
-    "discount": 0,
-    "premium": true
+    "price": 900,
+    "discount": 10,
+    "premium": true,
+    "image": "images/Classic Long Haram.jpg"
   },
   {
     "id": 8,
