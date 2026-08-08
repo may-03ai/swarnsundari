@@ -1,26 +1,30 @@
-const { getEnv, verifyAdminToken, jsonResponse, getAuthToken, parseJsonBody, githubRequest, base64Decode, ensureProductsArray } = require('./_shared');
+const { getEnv, verifyAdminToken, jsonResponse, getAuthToken, parseJsonBody, githubRequest, base64Decode, ensureProductsArray, safeErrorMessage } = require('./_shared');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return jsonResponse(405, { error: 'Method not allowed.' });
+    return jsonResponse(405, { error: 'Method not allowed.' }, {}, event);
   }
 
   const token = getAuthToken(event);
-  const tokenSecret = getEnv('ADMIN_TOKEN_SECRET') || getEnv('ADMIN_PASSWORD');
+  const tokenSecret = getEnv('ADMIN_TOKEN_SECRET');
   if (!token || !tokenSecret || !verifyAdminToken(token, tokenSecret)) {
-    return jsonResponse(401, { error: 'Unauthorized.' });
+    return jsonResponse(401, { error: 'Unauthorized.' }, {}, event);
   }
 
   const body = parseJsonBody(event);
   if (!body || typeof body.id === 'undefined') {
-    return jsonResponse(400, { error: 'Missing product id.' });
+    return jsonResponse(400, { error: 'Missing product id.' }, {}, event);
+  }
+  const requestedId = Number(body.id);
+  if (!Number.isFinite(requestedId) || requestedId <= 0) {
+    return jsonResponse(400, { error: 'Invalid product id.' }, {}, event);
   }
 
   const repo = getEnv('GITHUB_REPO');
   const githubToken = getEnv('GITHUB_TOKEN');
   const branch = getEnv('GITHUB_BRANCH') || 'main';
   if (!repo || !githubToken) {
-    return jsonResponse(500, { error: 'GitHub integration is not configured.' });
+    return jsonResponse(500, { error: 'GitHub integration is not configured.' }, {}, event);
   }
 
   try {
@@ -31,10 +35,10 @@ exports.handler = async (event) => {
       branch
     });
     const products = ensureProductsArray(JSON.parse(base64Decode(fileResponse.content || '')));
-    const targetProduct = products.find((entry) => Number(entry.id) === Number(body.id));
-    const filtered = products.filter((entry) => Number(entry.id) !== Number(body.id));
+    const targetProduct = products.find((entry) => Number(entry.id) === requestedId);
+    const filtered = products.filter((entry) => Number(entry.id) !== requestedId);
     if (!targetProduct) {
-      return jsonResponse(404, { error: 'Product not found.' });
+      return jsonResponse(404, { error: 'Product not found.' }, {}, event);
     }
 
     if (targetProduct.image && /^images\//i.test(targetProduct.image)) {
@@ -79,8 +83,8 @@ exports.handler = async (event) => {
       }
     });
 
-    return jsonResponse(200, { ok: true, message: 'Product deleted. Changes will publish in 1–2 minutes.' });
+    return jsonResponse(200, { ok: true, message: 'Product deleted. Changes will publish in 1–2 minutes.' }, {}, event);
   } catch (error) {
-    return jsonResponse(500, { error: error.message || 'Unable to delete the product right now.' });
+    return jsonResponse(500, { error: safeErrorMessage(error.message) }, {}, event);
   }
 };

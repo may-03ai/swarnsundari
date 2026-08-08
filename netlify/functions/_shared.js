@@ -1,7 +1,23 @@
 const crypto = require('crypto');
+const zlib = require('zlib');
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif']);
 
 function getEnv(name) {
   return process.env[name] || '';
+}
+
+function constantTimeCompare(left, right) {
+  if (typeof left !== 'string' || typeof right !== 'string') return false;
+  const leftBuffer = Buffer.from(left);
+  const rightBuffer = Buffer.from(right);
+  if (leftBuffer.length !== rightBuffer.length) return false;
+  try {
+    return crypto.timingSafeEqual(leftBuffer, rightBuffer);
+  } catch {
+    return false;
+  }
 }
 
 function createSignature(payload, secret) {
@@ -63,15 +79,122 @@ function verifyAdminToken(token, secret) {
   }
 }
 
-function jsonResponse(statusCode, body, headers = {}) {
+function getHeader(headers, name) {
+  if (!headers || typeof headers !== 'object') return '';
+  const direct = headers[name];
+  const lowered = headers[name.toLowerCase()];
+  return typeof direct === 'string' ? direct : typeof lowered === 'string' ? lowered : '';
+}
+
+function appendVaryHeader(currentValue, value) {
+  const values = [currentValue, value].filter(Boolean).join(',').split(',').map((item) => item.trim()).filter(Boolean);
+  return Array.from(new Set(values)).join(', ');
+}
+
+function safeErrorMessage(message) {
+  if (typeof message !== 'string') return 'Unable to process the request right now.';
+  if (/rate limit/i.test(message)) return message;
+  if (/unauthorized|forbidden|invalid|missing|not configured|not found/i.test(message)) return message;
+  return 'Unable to process the request right now.';
+}
+
+function normalizeImageMime(value) {
+  if (!value || typeof value !== 'string') return '';
+  const mime = value.toLowerCase().trim();
+  return mime === 'image/jpg' ? 'image/jpeg' : mime;
+}
+
+function validateImagePayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return { ok: false, error: 'Image payload is invalid.' };
+  }
+
+  const imageBase64 = typeof payload.imageBase64 === 'string' ? payload.imageBase64 : '';
+  if (!imageBase64) {
+    return { ok: true, mimeType: '', extension: '' };
+  }
+
+  const match = imageBase64.match(/^data:([^;]+);base64,(.+)$/i);
+  if (!match) {
+    return { ok: false, error: 'Image data must be a base64 data URL.' };
+  }
+
+  const mimeType = normalizeImageMime(match[1]);
+  if (!ALLOWED_IMAGE_MIME_TYPES.has(mimeType)) {
+    return { ok: false, error: 'Unsupported image type. Only PNG, JPEG, WEBP, and GIF images are supported.' };
+  }
+
+  const imageMime = normalizeImageMime(payload.imageMime);
+  if (imageMime && imageMime !== mimeType) {
+    return { ok: false, error: 'The provided image MIME type does not match the image data.' };
+  }
+
+  const base64Data = match[2];
+  const normalizedBase64 = base64Data + '='.repeat((4 - (base64Data.length % 4)) % 4);
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(normalizedBase64)) {
+    return { ok: false, error: 'Image data is not valid base64.' };
+  }
+
+  const imageBytes = Buffer.from(normalizedBase64, 'base64');
+  if (!imageBytes.length) {
+    return { ok: false, error: 'Image data is empty.' };
+  }
+  if (imageBytes.length > MAX_IMAGE_BYTES) {
+    return { ok: false, error: 'Image file is too large. Maximum size is 5MB.' };
+  }
+
+  const imageName = typeof payload.imageName === 'string' ? payload.imageName : '';
+  const extension = (imageName.split('.').pop() || mimeType.split('/').pop() || 'png').replace(/[^a-z0-9]+/gi, '').toLowerCase();
+  if (!extension) {
+    return { ok: false, error: 'Image file name is invalid.' };
+  }
+
+  return { ok: true, mimeType, extension, bytes: imageBytes };
+}
+
+function pickCompressionEncoding(headers) {
+  const acceptEncoding = getHeader(headers, 'Accept-Encoding') || '';
+  if (!acceptEncoding) return '';
+  const normalized = acceptEncoding.toLowerCase();
+  if (normalized.includes('br')) return 'br';
+  if (normalized.includes('gzip')) return 'gzip';
+  return '';
+}
+
+function jsonResponse(statusCode, body, headers = {}, event = null) {
+  const bodyText = typeof body === 'string' ? body : JSON.stringify(body);
+  const responseHeaders = {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    ...headers
+  };
+
+  const contentType = responseHeaders['Content-Type'] || responseHeaders['content-type'] || 'application/json';
+  const existingEncoding = responseHeaders['Content-Encoding'] || responseHeaders['content-encoding'];
+  const negotiatedEncoding = existingEncoding ? '' : pickCompressionEncoding(event && event.headers ? event.headers : {});
+  const shouldCompress = !existingEncoding && typeof bodyText === 'string' && Buffer.byteLength(bodyText, 'utf8') > 512 && /json|text|javascript|xml|svg/i.test(contentType) && (negotiatedEncoding === 'gzip' || negotiatedEncoding === 'br');
+
+  if (shouldCompress) {
+    const compressed = negotiatedEncoding === 'br'
+      ? zlib.brotliCompressSync(Buffer.from(bodyText, 'utf8'))
+      : zlib.gzipSync(Buffer.from(bodyText, 'utf8'));
+
+    responseHeaders['Content-Encoding'] = negotiatedEncoding;
+    responseHeaders['Vary'] = appendVaryHeader(responseHeaders['Vary'] || responseHeaders['vary'], 'Accept-Encoding');
+
+    return {
+      statusCode,
+      headers: responseHeaders,
+      body: compressed.toString('base64'),
+      isBase64Encoded: true
+    };
+  }
+
   return {
     statusCode,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store',
-      ...headers
-    },
-    body: JSON.stringify(body)
+    headers: responseHeaders,
+    body: bodyText
   };
 }
 
@@ -153,6 +276,7 @@ function ensureProductsArray(raw) {
 
 module.exports = {
   getEnv,
+  constantTimeCompare,
   createSignature,
   toBase64Url,
   fromBase64Url,
@@ -164,5 +288,7 @@ module.exports = {
   slugify,
   githubRequest,
   base64Decode,
-  ensureProductsArray
+  ensureProductsArray,
+  safeErrorMessage,
+  validateImagePayload
 };
