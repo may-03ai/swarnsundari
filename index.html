@@ -63,18 +63,18 @@
 
 
 		<main>
-			<!-- Mobile category chips (app-like); static fallback visible before JS loads -->
-			<div class="chip-row-wrap">
-				<div class="container">
-					<div id="chipRow" class="chip-row" role="tablist" aria-label="Categories">
-						<button role="tab" aria-selected="true" data-cat="all" class="chip active">All</button>
-						<button role="tab" data-cat="Anklets" class="chip">Anklets</button>
-						<button role="tab" data-cat="Bangles" class="chip">Bangles</button>
-						<button role="tab" data-cat="Best Sellers" class="chip">Best Sellers</button>
-						<button role="tab" data-cat="Necklace Sets" class="chip">Necklace Sets</button>
+			<section class="hero hero-premium" aria-label="Featured collection">
+				<div class="hero-banner">
+					<img src="images/model.jpg" alt="Celebrate in Gold — New Collection" loading="lazy">
+					<div class="hero-banner-overlay" aria-hidden="true"></div>
+					<div class="hero-banner-content">
+						<span class="hero-label">Celebrate in Gold</span>
+						<h1>Celebrate in Gold — New Collection</h1>
+						<p>Modern heirlooms for weddings, festivals and every precious moment.</p>
+						<a class="btn btn-primary" href="#categories">Shop Collections</a>
 					</div>
 				</div>
-			</div>
+			</section>
 
 			<!-- Mobile-only compact hero (shows on small screens) -->
 			<section id="mobileHero" class="mobile-hero" aria-hidden="false">
@@ -88,34 +88,27 @@
 					</div>
 				</div>
 			</section>
-			<section class="hero hero-premium">
-				<div class="container hero-grid">
-					<div class="hero-left">
-						<div class="hero-label-wrap">
-							<span class="hero-label">Timeless Beauty</span>
-						</div>
-						<h1>Discover Timeless Beauty<br>in Every Piece of Jewellery</h1>
-						<div class="hero-ornament"></div>
-						<p class="sub">Elegant 1 Gram Gold Jewellery<br>Crafted for Every Celebration</p>
-						<div class="cta">
-							<a href="#categories" class="btn btn-primary">Explore Collection</a>
-						</div>
-						<p class="hero-note">A premium jewellery showroom experience with necklace, earrings, bangles, ring and maang tikka under warm golden lighting.</p>
+
+			<!-- Mobile category chips (app-like); static fallback visible before JS loads -->
+			<div class="chip-row-wrap">
+				<div class="container chip-row-shell">
+					<div id="chipRow" class="chip-row" role="tablist" aria-label="Categories">
+						<button role="tab" aria-selected="true" data-cat="all" class="chip active">All</button>
+						<button role="tab" data-cat="Anklets" class="chip">Anklets</button>
+						<button role="tab" data-cat="Bangles" class="chip">Bangles</button>
+						<button role="tab" data-cat="Best Sellers" class="chip">Best Sellers</button>
+						<button role="tab" data-cat="Necklace Sets" class="chip">Necklace Sets</button>
 					</div>
+					<button type="button" id="chipToggle" class="chip-toggle" aria-expanded="false">Show more categories</button>
 				</div>
-				<div class="hero-right">
-					<div class="hero-visual">
-						<img src="images/model.jpg" alt="Premium 1 gram gold jewellery showroom" loading="lazy">
-						<div class="hero-banner-overlay">
-							<h2>Celebrate in Gold — New Collection</h2>
-							<a class="btn btn-primary" href="#categories">Shop Collections</a>
-						</div>
-						<button class="hero-image-wa" onclick="document.getElementById('floatWA').click()">
-							<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.472-.148-.672.15-.198.297-.768.966-.942 1.164-.173.198-.347.223-.644.075-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.058-.173-.297-.018-.458.13-.606.134-.133.298-.347.447-.52.149-.173.198-.298.297-.497.099-.198.05-.372-.025-.521-.075-.149-.672-1.612-.92-2.21-.242-.579-.487-.5-.672-.51l-.573-.01c-.198 0-.52.075-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.102 3.2 5.084 4.487.71.306 1.262.489 1.694.626.711.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.273-.198-.57-.347z"/></svg>
-							<span>Contact on WhatsApp</span>
-						</button>
-					</div>
+			</div>
+
+			<section id="story" class="container story-intro">
+				<div class="hero-label-wrap">
+					<span class="hero-label">Timeless Beauty</span>
 				</div>
+				<h2 class="section-title">Discover Timeless Beauty in Every Piece of Jewellery</h2>
+				<p class="section-copy">Elegant 1 Gram Gold Jewellery crafted for every celebration, from classic heirlooms to modern festive statements.</p>
 			</section>
 
 			<section id="categories" class="container">
@@ -129,6 +122,8 @@
 
 				<div id="productsGrid" class="products-grid" aria-live="polite" aria-busy="false"></div>
 			</section>
+
+			<section id="gallery" class="container">
 				<h2 class="section-title">Gallery</h2>
 				<div class="gallery">
 					<img onclick="openLightbox(this)" src="images/necklace.png" alt="Necklace Sets" loading="lazy">

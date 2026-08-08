@@ -90,6 +90,17 @@ function populateFilterOptions(){
   }
 }
 
+function bindChipToggle(){
+  const toggle = document.getElementById('chipToggle');
+  const shell = document.querySelector('.chip-row-shell');
+  if(!toggle || !shell) return;
+  toggle.addEventListener('click', ()=>{
+    const expanded = shell.classList.toggle('is-expanded');
+    toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    toggle.textContent = expanded ? 'Show fewer categories' : 'Show more categories';
+  });
+}
+
 // DOM references
 const productGrid = document.getElementById('productsGrid');
 const searchInput = document.getElementById('searchInput');
@@ -275,6 +286,7 @@ function lazyLoadImages(){
 document.addEventListener('DOMContentLoaded',()=>{
   const pre = document.getElementById('preloader');
   if(pre){ setTimeout(()=>pre.classList.add('hidden'),400); }
+  bindChipToggle();
 });
 
 // Initial render: load products.json then render
