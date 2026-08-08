@@ -10,16 +10,6 @@
     "image": "images/1786169362192-royal-necklace-set-1.png"
   },
   {
-    "id": 3,
-    "name": "Royal Necklace Set (3)",
-    "category": "Necklace Sets",
-    "image": "images/necklace.png",
-    "desc": "Elegant 1 gram necklace set variant.",
-    "price": 11900,
-    "discount": 0,
-    "premium": true
-  },
-  {
     "id": 4,
     "name": "Royal Necklace Set (4)",
     "category": "Necklace Sets",
