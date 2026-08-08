@@ -3,11 +3,11 @@
     "id": 1,
     "name": "Royal Necklace Set 1",
     "category": "Necklace Sets",
-    "image": "images/necklace.png",
     "desc": "Elegant 1 gram necklace set for bridal and festive wear.",
-    "price": 12000,
-    "discount": 0,
-    "premium": true
+    "price": 600,
+    "discount": 10,
+    "premium": true,
+    "image": "images/necklace.png"
   },
   {
     "id": 2,
