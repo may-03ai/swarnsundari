@@ -50,16 +50,6 @@
     "premium": true
   },
   {
-    "id": 10,
-    "name": "Classic Long Haram (5)",
-    "category": "Long Haram",
-    "image": "images/Classic Long Haram.jpg",
-    "desc": "Traditional long haram variant.",
-    "price": 8700,
-    "discount": 0,
-    "premium": true
-  },
-  {
     "id": 11,
     "name": "Minimal Mangalsutra (1)",
     "category": "Mangalsutra",
