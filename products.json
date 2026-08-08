@@ -10,16 +10,6 @@
     "image": "images/1786169362192-royal-necklace-set-1.png"
   },
   {
-    "id": 4,
-    "name": "Royal Necklace Set (4)",
-    "category": "Necklace Sets",
-    "image": "images/necklace.png",
-    "desc": "Elegant 1 gram necklace set variant.",
-    "price": 12100,
-    "discount": 0,
-    "premium": true
-  },
-  {
     "id": 6,
     "name": "Classic Long Haram (1)",
     "category": "Long Haram",
