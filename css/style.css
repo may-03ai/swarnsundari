@@ -207,6 +207,33 @@ body{font-family:Montserrat,system-ui,Arial,sans-serif;background:var(--bg);colo
 .search-row input{flex:1 1 0;min-width:0;max-width:100%}
 .search-row select{flex:0 0 150px;min-width:0;max-width:100%}
 .search-row input, .search-row select{box-sizing:border-box}
+
+@media (min-width: 1024px){
+  .container{width:min(100%, var(--max-width));padding-inline:clamp(24px, 3vw, 40px)}
+  .header{height:auto;min-height:78px;background:rgba(255,248,240,0.94);backdrop-filter:saturate(120%) blur(8px);box-shadow:0 6px 24px rgba(75,54,33,0.06);border-bottom:1px solid rgba(140,106,47,0.08)}
+  .header.transparent{background:rgba(255,248,240,0.94);box-shadow:0 6px 24px rgba(75,54,33,0.06);border-bottom:1px solid rgba(140,106,47,0.08)}
+  .header .nav{width:min(100%, var(--max-width));max-width:var(--max-width);margin:0 auto;padding:0 clamp(24px, 3vw, 40px);height:78px;gap:24px}
+  .header nav{width:auto}
+  .brand-block{flex-direction:column}
+  .header-brand{font-size:24px;white-space:normal;overflow:visible;text-overflow:clip}
+  .header-tagline{display:block;font-size:13px;color:var(--accent);letter-spacing:0.18em;text-transform:uppercase;font-weight:700}
+  .nav-links{gap:20px;flex-wrap:wrap;justify-content:flex-end}
+  .nav-links a{padding:10px 14px;font-size:15px}
+  .chip-row-wrap{position:relative;top:auto;left:auto;right:auto;padding:18px 0 0;overflow:visible;background:transparent}
+  .chip-row{display:flex;flex-wrap:wrap;gap:10px;overflow:visible;justify-content:flex-start;padding:0}
+  .hero-premium{padding:96px 0 64px;min-height:auto}
+  .hero-grid{display:grid;grid-template-columns:minmax(0, 1.05fr) minmax(0, 0.95fr);align-items:center;gap:32px;min-height:70vh}
+  .hero-left{width:100%;max-width:620px;padding:0}
+  .hero-right{position:relative;top:auto;right:auto;bottom:auto;width:100%;height:560px;overflow:hidden}
+  .hero-visual{position:relative;inset:0;width:100%;height:100%}
+  .hero-visual img{height:100%;object-fit:cover;object-position:center right}
+  .hero-image-wa{position:absolute;right:24px;bottom:24px}
+  .feature-grid{grid-template-columns:repeat(3, minmax(0, 1fr));gap:22px}
+  .products-grid{grid-template-columns:repeat(3, minmax(0, 1fr));gap:24px}
+  .gallery{column-count:4;column-gap:18px}
+  .footer .cols{grid-template-columns:repeat(3, minmax(0, 1fr));gap:28px}
+}
+
 /* Animations */
 .fade-in{opacity:0;transform:translateY(12px);transition:opacity 600ms ease,transform 600ms ease}
 .fade-in.visible{opacity:1;transform:none}
