@@ -10,16 +10,6 @@
     "image": "images/1786169362192-royal-necklace-set-1.png"
   },
   {
-    "id": 6,
-    "name": "Classic Long Haram (1)",
-    "category": "Long Haram",
-    "image": "images/Classic Long Haram.jpg",
-    "desc": "Traditional long haram made for celebrations.",
-    "price": 8500,
-    "discount": 0,
-    "premium": true
-  },
-  {
     "id": 7,
     "name": "Classic Long Haram (2)",
     "category": "Long Haram",
