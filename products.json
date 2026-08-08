@@ -10,64 +10,14 @@
     "image": "images/1786169362192-royal-necklace-set-1.png"
   },
   {
-    "id": 6,
-    "name": "Classic Long Haram (1)",
-    "category": "Long Haram",
-    "image": "images/Classic Long Haram.jpg",
-    "desc": "Traditional long haram made for celebrations.",
-    "price": 8500,
-    "discount": 0,
-    "premium": true
-  },
-  {
-    "id": 7,
-    "name": "Classic Long Haram (2)",
-    "category": "Long Haram",
-    "desc": "Traditional long haram variant.",
-    "price": 900,
-    "discount": 10,
-    "premium": true,
-    "image": "images/Classic Long Haram.jpg"
-  },
-  {
-    "id": 8,
-    "name": "Classic Long Haram (3)",
-    "category": "Long Haram",
-    "image": "images/Classic Long Haram.jpg",
-    "desc": "Traditional long haram variant.",
-    "price": 8550,
-    "discount": 0,
-    "premium": true
-  },
-  {
-    "id": 9,
-    "name": "Classic Long Haram (4)",
-    "category": "Long Haram",
-    "image": "images/Classic Long Haram.jpg",
-    "desc": "Traditional long haram variant.",
-    "price": 8650,
-    "discount": 0,
-    "premium": true
-  },
-  {
-    "id": 10,
-    "name": "Classic Long Haram (5)",
-    "category": "Long Haram",
-    "image": "images/Classic Long Haram.jpg",
-    "desc": "Traditional long haram variant.",
-    "price": 8700,
-    "discount": 0,
-    "premium": true
-  },
-  {
     "id": 11,
     "name": "Minimal Mangalsutra (1)",
     "category": "Mangalsutra",
-    "image": "images/Minimal Mangalsutra.jpg",
     "desc": "Timeless mangalsutra design with modern touch.",
-    "price": 7200,
+    "price": 550,
     "discount": 0,
-    "premium": true
+    "premium": true,
+    "image": "images/Minimal Mangalsutra.jpg"
   },
   {
     "id": 12,
