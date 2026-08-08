@@ -13,11 +13,11 @@
     "id": 11,
     "name": "Minimal Mangalsutra (1)",
     "category": "Mangalsutra",
-    "image": "images/Minimal Mangalsutra.jpg",
     "desc": "Timeless mangalsutra design with modern touch.",
-    "price": 7200,
+    "price": 717,
     "discount": 0,
-    "premium": true
+    "premium": true,
+    "image": "images/Minimal Mangalsutra.jpg"
   },
   {
     "id": 12,
